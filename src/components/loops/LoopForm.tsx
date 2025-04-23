@@ -4,19 +4,18 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../ui/Card
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { FrequencyType, PrivacyType } from '../../types';
-import { Calendar, Lock, Eye, Users } from 'lucide-react';
+import { Calendar, Lock, Eye } from 'lucide-react';
+import { loopService } from '../../services/api';
 
 const frequencyOptions: { value: FrequencyType; label: string }[] = [
   { value: 'daily', label: 'Every day' },
-  { value: 'weekdays', label: 'Weekdays only' },
-  { value: '3x-week', label: '3 times per week' },
-  { value: 'custom', label: 'Custom schedule' }
+  { value: 'weekly', label: 'Every week' },
+  { value: 'monthly', label: 'Every month' }
 ];
 
 const privacyOptions: { value: PrivacyType; label: string; icon: React.ReactNode }[] = [
   { value: 'private', label: 'Private', icon: <Lock className="h-4 w-4" /> },
-  { value: 'public', label: 'Public', icon: <Eye className="h-4 w-4" /> },
-  { value: 'friends', label: 'Friends only', icon: <Users className="h-4 w-4" /> }
+  { value: 'public', label: 'Public', icon: <Eye className="h-4 w-4" /> }
 ];
 
 // Common emojis for habits
@@ -29,11 +28,13 @@ export const LoopForm: React.FC = () => {
     title: '',
     frequency: 'daily' as FrequencyType,
     startDate: new Date().toISOString().split('T')[0], // Today in YYYY-MM-DD format
+    endDate: new Date().toISOString().split('T')[0], // Today in YYYY-MM-DD format
     privacy: 'private' as PrivacyType,
     emoji: '🔄'
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -51,22 +52,40 @@ export const LoopForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Navigate to dashboard after form submission
-    navigate('/dashboard');
+    try {
+      await loopService.createLoop({
+        title: formState.title,
+        frequency: formState.frequency,
+        startDate: formState.startDate,
+        endDate: formState.endDate,
+        visibility: formState.privacy,
+        emoji: formState.emoji
+      });
+      navigate('/dashboard');
+    } catch (err) {
+      console.error(err);
+      setError('Failed to create loop. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
     <Card className="w-full max-w-md mx-auto">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle>Create a new Loop</CardTitle>
+          <CardTitle >Create a new Loop</CardTitle>
         </CardHeader>
         
         <CardContent className="space-y-4">
+          {error && (
+            <div className="p-3 bg-red-50 text-red-600 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+          
           {/* Title */}
           <div className="space-y-2">
             <Input
@@ -137,6 +156,17 @@ export const LoopForm: React.FC = () => {
             />
           </div>
           
+          <div>
+            <Input
+              label="End date"
+              type="date"
+              name="endDate"
+              id="endDate"
+              value={formState.endDate}
+              onChange={handleInputChange}
+              leftIcon={<Calendar className="h-4 w-4 text-gray-500" />}
+            />
+          </div> 
           {/* Privacy */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
@@ -162,7 +192,6 @@ export const LoopForm: React.FC = () => {
             <p className="text-sm text-gray-500">
               {formState.privacy === 'private' && 'Only you can see this loop'}
               {formState.privacy === 'public' && 'Everyone can see and interact with this loop'}
-              {formState.privacy === 'friends' && 'Only your friends can see this loop'}
             </p>
           </div>
         </CardContent>

@@ -2,24 +2,31 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  avatar?: string;
+  password?: string;
+  avatar: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
-export type FrequencyType = 'daily' | 'weekdays' | 'custom' | '3x-week';
+export type FrequencyType = 'daily' | 'weekly' | 'monthly';
 
-export type PrivacyType = 'private' | 'public' | 'friends';
+export type PrivacyType = 'public' | 'private';
 
-export type Loop = {
+export interface Loop {
   id: string;
   title: string;
-  frequency: FrequencyType;
+  emoji: string;
+  frequency: string;
   startDate: string;
-  privacy: PrivacyType;
-  emoji?: string;
-  coverImage?: string;
+  description?: string;
+  visibility: 'public' | 'private';
   userId: string;
   createdAt: string;
-};
+  updatedAt: string;
+  creator?: User;
+  reactions?: Reaction[];
+  cloneCount?: number;
+}
 
 export type LoopCheck = {
   id: string;
@@ -28,21 +35,22 @@ export type LoopCheck = {
   completed: boolean;
 };
 
-export type LoopStreak = {
-  loopId: string;
+export interface LoopStats {
   currentStreak: number;
   longestStreak: number;
   completionRate: number;
-  checks: LoopCheck[];
-};
+  totalCheckIns: number;
+  totalSkipped: number;
+  status: 'active' | 'broken' | 'completed';
+}
 
-export type Reaction = {
+export interface Reaction {
   id: string;
   loopId: string;
   userId: string;
   emoji: string;
   createdAt: string;
-};
+}
 
 export type AuthContextType = {
   user: User | null;

@@ -10,6 +10,7 @@ import { CreateLoopPage } from './pages/CreateLoopPage';
 import { DiscoverPage } from './pages/DiscoverPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
+import { EditLoopPage } from './pages/EditLoopPage';
 
 // Protected route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -44,6 +45,11 @@ const AppRoutes: React.FC = () => {
       <Route path="/create" element={
         <ProtectedRoute>
           <CreateLoopPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/edit/:id" element={
+        <ProtectedRoute>
+          <EditLoopPage />
         </ProtectedRoute>
       } />
       

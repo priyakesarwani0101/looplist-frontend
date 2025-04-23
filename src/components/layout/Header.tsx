@@ -29,7 +29,7 @@ export const Header: React.FC = () => {
               </NavLink>
               <NavLink to="/discover" active={location.pathname === '/discover'}>
                 <Compass className="h-5 w-5" />
-                <span className="hidden sm:inline-block">Discover</span>
+                <span className="hidden sm:inline-block">Public Loops</span>
               </NavLink>
             </nav>
             
@@ -58,6 +58,7 @@ export const Header: React.FC = () => {
                 aria-label="Log out"
                 className="text-gray-500"
               >
+                <span className="hidden sm:inline-block">Logout</span>
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>

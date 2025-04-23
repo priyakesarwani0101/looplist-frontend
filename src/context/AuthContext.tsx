@@ -16,6 +16,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -23,8 +24,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (currentUser && accessToken) {
       setUser(currentUser);
+      setIsAuthenticated(true);
     } else {
-      authService.logout();
+      setUser(null);
+      setIsAuthenticated(false);
     }
     setIsLoading(false);
   }, []);
@@ -32,24 +35,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     const response = await authService.login({ email, password });
     setUser(response.user);
+    setIsAuthenticated(true);
   };
 
   const signup = async (name: string, email: string, password: string) => {
     const response = await authService.register({ name, email, password });
     // The login will be handled by the register method in authService
     setUser(response);
+    setIsAuthenticated(true);
   };
 
-  const logout = () => {
-    authService.logout();
-    setUser(null);
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        isAuthenticated,
         isLoading,
         login,
         signup,
